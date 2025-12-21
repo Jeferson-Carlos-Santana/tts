@@ -4,7 +4,9 @@ import json, asyncio, uuid
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import edge_tts
 
-BASE_DIR = r"/usr/local/lsws/Example/html/demo/media/cache"
+# BASE_DIR = r"/usr/local/lsws/Example/html/demo/media/cache"
+BASE_DIR = "/usr/local/lsws/Example/html/fyningles/media/cache"
+
 os.makedirs(BASE_DIR, exist_ok=True)
 
 class Handler(BaseHTTPRequestHandler):
