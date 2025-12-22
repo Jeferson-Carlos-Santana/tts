@@ -31,6 +31,6 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps({"file": filename}).encode())
 
 # server = HTTPServer(("127.0.0.1", 9000), Handler)
-HTTPServer(("0.0.0.0", 9000), Handler)
+server = HTTPServer(("0.0.0.0", 9000), Handler)
 print("TTS em http://127.0.0.1:9000")
 server.serve_forever()
