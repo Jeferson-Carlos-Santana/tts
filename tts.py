@@ -1,4 +1,3 @@
-
 import os
 import json, asyncio, hashlib
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -11,36 +10,35 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         length = int(self.headers.get("Content-Length"))
         data = json.loads(self.rfile.read(length))
-        text = data.get("text", "").strip()
+
+        raw_text = data.get("text", "")
+        text = " ".join(raw_text.lower().strip().split())
 
         if not text:
             self.send_response(400)
             self.end_headers()
             return
 
-        # 🔑 NOME DETERMINÍSTICO (CACHE)
         filename = hashlib.md5(text.encode("utf-8")).hexdigest() + ".mp3"
         filepath = os.path.join(BASE_DIR, filename)
+        lock_path = filepath + ".lock"
 
-        # ✅ SE JÁ EXISTE, NÃO GERA DE NOVO
         if not os.path.exists(filepath):
-            async def run():
-                await edge_tts.Communicate(
-                    text=text,
-                    voice="en-US-AvaNeural"
-                ).save(filepath)
+            if not os.path.exists(lock_path):
+                open(lock_path, "w").close()
+                async def run():
+                    await edge_tts.Communicate(
+                        text=raw_text,
+                        voice="en-US-AvaNeural"
+                    ).save(filepath)
+                asyncio.run(run())
+                os.remove(lock_path)
 
-            asyncio.run(run())
-
-        # resposta (igual ao antigo)
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-        self.wfile.write(
-            json.dumps({"file": filename}).encode()
-        )
+        self.wfile.write(json.dumps({"file": filename}).encode())
 
-# server = HTTPServer(("127.0.0.1", 9000), Handler)
 server = HTTPServer(("0.0.0.0", 9000), Handler)
 print("TTS em http://127.0.0.1:9000")
 server.serve_forever()
