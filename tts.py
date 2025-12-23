@@ -1,8 +1,7 @@
 import os
-import json, asyncio, hashlib, shutil
+import json, asyncio, hashlib, shutil, time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import edge_tts
-import time
 
 BASE_DIR = r"/usr/local/lsws/Example/html/demo/media/cache"
 CACHE_DIR = os.path.join(BASE_DIR, "_tts_cache")
@@ -14,31 +13,27 @@ VOICE = "en-US-AvaNeural"
 
 def gerar_audio_cache(texto, arquivo_saida):
     key = hashlib.md5(f"{texto}_{VOICE}".encode("utf-8")).hexdigest()
-    cache_file = os.path.join(CACHE_DIR, f"{key}.mp3")    
-
-    shutil.copy(cache_file, arquivo_saida)
-
-    # GARANTE QUE O ARQUIVO ESTÁ 100% DISPONÍVEL
-    for _ in range(10):
-        if os.path.exists(arquivo_saida) and os.path.getsize(arquivo_saida) > 0:
-            break
-        time.sleep(0.1)
-
+    cache_file = os.path.join(CACHE_DIR, f"{key}.mp3")
 
     # ✅ CACHE HIT
     if os.path.exists(cache_file):
         shutil.copy(cache_file, arquivo_saida)
-        return
+    else:
+        # ❌ CACHE MISS → gera UMA VEZ
+        async def run():
+            await edge_tts.Communicate(
+                text=texto,
+                voice=VOICE
+            ).save(cache_file)
 
-    # ❌ CACHE MISS → gera UMA VEZ
-    async def run():
-        await edge_tts.Communicate(
-            text=texto,
-            voice=VOICE
-        ).save(cache_file)
+        asyncio.run(run())
+        shutil.copy(cache_file, arquivo_saida)
 
-    asyncio.run(run())
-    shutil.copy(cache_file, arquivo_saida)
+    # ⏳ GARANTE QUE O ARQUIVO FINAL ESTÁ PRONTO
+    for _ in range(20):
+        if os.path.exists(arquivo_saida) and os.path.getsize(arquivo_saida) > 0:
+            break
+        time.sleep(0.05)
 
 class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -51,7 +46,6 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             return
 
-        # arquivo FINAL (sempre único por request)
         filename = hashlib.md5(text.encode("utf-8")).hexdigest() + ".mp3"
         out_path = os.path.join(BASE_DIR, filename)
 
