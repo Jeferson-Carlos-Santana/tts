@@ -2,6 +2,7 @@ import os
 import json, asyncio, hashlib, shutil
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import edge_tts
+import time
 
 BASE_DIR = r"/usr/local/lsws/Example/html/demo/media/cache"
 CACHE_DIR = os.path.join(BASE_DIR, "_tts_cache")
@@ -13,7 +14,16 @@ VOICE = "en-US-AvaNeural"
 
 def gerar_audio_cache(texto, arquivo_saida):
     key = hashlib.md5(f"{texto}_{VOICE}".encode("utf-8")).hexdigest()
-    cache_file = os.path.join(CACHE_DIR, f"{key}.mp3")
+    cache_file = os.path.join(CACHE_DIR, f"{key}.mp3")    
+
+    shutil.copy(cache_file, arquivo_saida)
+
+    # GARANTE QUE O ARQUIVO ESTÁ 100% DISPONÍVEL
+    for _ in range(10):
+        if os.path.exists(arquivo_saida) and os.path.getsize(arquivo_saida) > 0:
+            break
+        time.sleep(0.1)
+
 
     # ✅ CACHE HIT
     if os.path.exists(cache_file):
