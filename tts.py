@@ -1,33 +1,31 @@
 import os
-import json, asyncio, hashlib, shutil
+import json, asyncio, hashlib
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import edge_tts
 
 BASE_DIR = "/usr/local/lsws/Example/html/demo/media/cache"
-CACHE_DIR = os.path.join(BASE_DIR, "_tts_cache")
-MANIFEST_DIR = os.path.join(BASE_DIR, "_manifest")
-
-os.makedirs(CACHE_DIR, exist_ok=True)
-os.makedirs(MANIFEST_DIR, exist_ok=True)
+os.makedirs(BASE_DIR, exist_ok=True)
 
 VOICE = "en-US-AvaNeural"
 
+
 def gerar_audio(texto):
+    """
+    Gera o áudio FINAL diretamente em /media/cache.
+    Se já existir, não gera de novo.
+    """
     key = hashlib.md5(f"{texto}_{VOICE}".encode("utf-8")).hexdigest()
     final_path = os.path.join(BASE_DIR, f"{key}.mp3")
-    cache_path = os.path.join(CACHE_DIR, f"{key}.mp3")
 
-    # ✅ SE JÁ EXISTE O FINAL → NÃO CHAMA TTS
+    # ✅ SE JÁ EXISTE → NÃO FAZ NADA
     if os.path.exists(final_path):
         return f"{key}.mp3"
 
-    # 🔊 PRIMEIRA VEZ → GERA USANDO _tts_cache
-    if not os.path.exists(cache_path):
-        async def run():
-            await edge_tts.Communicate(text=texto, voice=VOICE).save(cache_path)
-        asyncio.run(run())
+    # 🔊 GERA DIRETO NO CACHE FINAL
+    async def run():
+        await edge_tts.Communicate(text=texto, voice=VOICE).save(final_path)
 
-    shutil.copy(cache_path, final_path)
+    asyncio.run(run())
     return f"{key}.mp3"
 
 
@@ -35,31 +33,23 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         length = int(self.headers.get("Content-Length", 0))
         data = json.loads(self.rfile.read(length))
-        texts = data.get("texts") or [data.get("text", "").strip()]
 
-        if not texts or not texts[0]:
+        # aceita texto único ou lista
+        texts = data.get("texts")
+        if not texts:
+            text = data.get("text", "").strip()
+            texts = [text] if text else []
+
+        if not texts:
             self.send_response(400)
             self.end_headers()
             return
 
-        # 🔐 MANIFEST POR REQUISIÇÃO (ORDEM FIXA)
-        manifest_key = hashlib.md5(
-            ("|".join(texts) + VOICE).encode("utf-8")
-        ).hexdigest()
-        manifest_path = os.path.join(MANIFEST_DIR, f"{manifest_key}.json")
-
-        # ✅ REPETIÇÃO → SÓ DEVOLVE A ORDEM
-        if os.path.exists(manifest_path):
-            files = json.loads(open(manifest_path).read())
-        else:
-            files = []
-            for texto in texts:
-                fname = gerar_audio(texto)
-                files.append(fname)
-
-            # 🔥 SALVA A ORDEM UMA ÚNICA VEZ
-            with open(manifest_path, "w") as f:
-                json.dump(files, f)
+        # 🔥 GERA / REUTILIZA EM ORDEM
+        files = []
+        for texto in texts:
+            fname = gerar_audio(texto)
+            files.append(fname)
 
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
@@ -70,6 +60,7 @@ class Handler(BaseHTTPRequestHandler):
 server = HTTPServer(("0.0.0.0", 9000), Handler)
 print("TTS em http://127.0.0.1:9000")
 server.serve_forever()
+
 
 
 # import os
