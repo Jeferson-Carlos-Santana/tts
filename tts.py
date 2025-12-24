@@ -12,24 +12,19 @@ VOICE = "en-US-AvaNeural"
 
 
 def gerar_audio(texto):
-    """
-    Gera o MP3 FINAL diretamente em /media/cache.
-    Se já existir, reutiliza.
-    NÃO existe cache intermediário.
-    """
     key = hashlib.md5(f"{texto}_{VOICE}".encode("utf-8")).hexdigest()
-    final_path = os.path.join(BASE_DIR, f"{key}.mp3")
+    out_path = os.path.join(BASE_DIR, f"{key}.mp3")
 
-    # ✅ Repetição: NÃO gera de novo
-    if os.path.exists(final_path):
+    # ✅ se já existe, reutiliza
+    if os.path.exists(out_path):
         return f"{key}.mp3"
 
-    # 🔊 Primeira vez: gera DIRETO no cache final
+    # 🔊 gera DIRETO no cache final
     async def run():
         await edge_tts.Communicate(
             text=texto,
             voice=VOICE
-        ).save(final_path)
+        ).save(out_path)
 
     asyncio.run(run())
     return f"{key}.mp3"
@@ -40,7 +35,7 @@ class Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", 0))
         data = json.loads(self.rfile.read(length))
 
-        # aceita texto único ou lista (ordem preservada)
+        # aceita texto único ou lista
         texts = data.get("texts")
         if not texts:
             text = data.get("text", "").strip()
@@ -62,8 +57,9 @@ class Handler(BaseHTTPRequestHandler):
 
 
 server = HTTPServer(("0.0.0.0", 9000), Handler)
-print("TTS rodando em http://127.0.0.1:9000")
+print("TTS em http://127.0.0.1:9000")
 server.serve_forever()
+
 
 
 
