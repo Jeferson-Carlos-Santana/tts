@@ -11,29 +11,18 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 
 VOICE = "en-US-AvaNeural"
 
-def gerar_audio_cache(texto, arquivo_saida):
+def gerar_audio_cache(texto):
     key = hashlib.md5(f"{texto}_{VOICE}".encode("utf-8")).hexdigest()
     cache_file = os.path.join(CACHE_DIR, f"{key}.mp3")
+    out_path = os.path.join(BASE_DIR, f"{key}.mp3")
 
-    # ✅ CACHE HIT
-    if os.path.exists(cache_file):
-        shutil.copy(cache_file, arquivo_saida)
-    else:
-        # ❌ CACHE MISS → gera UMA VEZ
+    if not os.path.exists(cache_file):
         async def run():
-            await edge_tts.Communicate(
-                text=texto,
-                voice=VOICE
-            ).save(cache_file)
-
+            await edge_tts.Communicate(text=texto, voice=VOICE).save(cache_file)
         asyncio.run(run())
-        shutil.copy(cache_file, arquivo_saida)
 
-    # ⏳ GARANTE QUE O ARQUIVO FINAL ESTÁ PRONTO
-    for _ in range(20):
-        if os.path.exists(arquivo_saida) and os.path.getsize(arquivo_saida) > 0:
-            break
-        time.sleep(0.05)
+    shutil.copy(cache_file, out_path)
+    return f"{key}.mp3"
 
 class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
