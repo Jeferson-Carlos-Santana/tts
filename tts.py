@@ -1,30 +1,27 @@
 import os
-import json
-import asyncio
-import hashlib
+import json, asyncio, hashlib, shutil, time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import edge_tts
 
-BASE_DIR = "/usr/local/lsws/Example/html/demo/media/cache"
+BASE_DIR = r"/usr/local/lsws/Example/html/demo/media/cache"
+
+
 os.makedirs(BASE_DIR, exist_ok=True)
+
 
 VOICE = "en-US-AvaNeural"
 
-
-def gerar_audio(texto):
+def gerar_audio_cache(texto):
     key = hashlib.md5(f"{texto}_{VOICE}".encode("utf-8")).hexdigest()
     out_path = os.path.join(BASE_DIR, f"{key}.mp3")
 
-    # ✅ se já existe, reutiliza
+    # se já existe, reutiliza
     if os.path.exists(out_path):
         return f"{key}.mp3"
 
-    # 🔊 gera DIRETO no cache final
+    # gera DIRETO no cache final
     async def run():
-        await edge_tts.Communicate(
-            text=texto,
-            voice=VOICE
-        ).save(out_path)
+        await edge_tts.Communicate(text=texto, voice=VOICE).save(out_path)
 
     asyncio.run(run())
     return f"{key}.mp3"
@@ -32,29 +29,24 @@ def gerar_audio(texto):
 
 class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
-        length = int(self.headers.get("Content-Length", 0))
+        length = int(self.headers.get("Content-Length"))
         data = json.loads(self.rfile.read(length))
+        text = data.get("text", "").strip()
 
-        # aceita texto único ou lista
-        texts = data.get("texts")
-        if not texts:
-            text = data.get("text", "").strip()
-            texts = [text] if text else []
-
-        if not texts:
+        if not text:
             self.send_response(400)
             self.end_headers()
             return
 
-        files = []
-        for texto in texts:
-            files.append(gerar_audio(texto))
+        filename = hashlib.md5(text.encode("utf-8")).hexdigest() + ".mp3"
+        out_path = os.path.join(BASE_DIR, filename)
+
+        gerar_audio_cache(text, out_path)
 
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-        self.wfile.write(json.dumps({"files": files}).encode())
-
+        self.wfile.write(json.dumps({"file": filename}).encode())
 
 server = HTTPServer(("0.0.0.0", 9000), Handler)
 print("TTS em http://127.0.0.1:9000")
