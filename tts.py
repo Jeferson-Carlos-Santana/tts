@@ -5,7 +5,7 @@ import hashlib
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import edge_tts
 
-BASE_DIR = "/usr/local/lsws/Example/html/demo/media/cache"
+BASE_DIR = r"/usr/local/lsws/Example/html/demo/media/cache"
 os.makedirs(BASE_DIR, exist_ok=True)
 
 VOICE = "en-US-AvaNeural"
