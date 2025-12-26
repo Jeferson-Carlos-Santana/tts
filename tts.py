@@ -15,9 +15,8 @@ VOICE_DEFAULT = "en-US-AvaNeural"
 VOICE_EN = "en-GB-RyanNeural"
 VOICE_PT = "pt-BR-AntonioNeural"
 
-RATE_PT = "+20%"
+RATE_PT = "+25%"
 RATE_EN = "-7%"
-
 
 def filename_from_text(texto: str, voice: str) -> str:
     # 🔥 mesmo padrão (hash), só que agora inclui a voz escolhida
