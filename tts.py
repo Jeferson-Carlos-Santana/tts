@@ -61,11 +61,17 @@ def gerar_audio(texto: str, voice: str, rate: str | None) -> str:
         return filename
 
     async def run():
-        await edge_tts.Communicate(
-            text=texto,
-            voice=voice,
-            rate=rate
-        ).save(out_path)
+        if rate:
+            await edge_tts.Communicate(
+                text=texto,
+                voice=voice,
+                rate=rate
+            ).save(out_path)
+        else:
+            await edge_tts.Communicate(
+                text=texto,
+                voice=voice
+            ).save(out_path)
 
     asyncio.run(run())
     return filename
