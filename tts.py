@@ -12,8 +12,12 @@ os.makedirs(BASE_DIR, exist_ok=True)
 VOICE_DEFAULT = "en-US-AvaNeural"
 
 # ✅ novas vozes por idioma (você pode trocar depois)
-VOICE_EN = "en-US-AvaNeural"
-VOICE_PT = "pt-BR-FranciscaNeural"
+VOICE_EN = "en-GB-RyanNeural"
+VOICE_PT = "pt-BR-AntonioNeural"
+
+RATE_PT = "+20%"
+RATE_EN = "-7%"
+
 
 def filename_from_text(texto: str, voice: str) -> str:
     # 🔥 mesmo padrão (hash), só que agora inclui a voz escolhida
@@ -35,19 +39,33 @@ def gerar_audio(texto: str, voice: str) -> str:
     asyncio.run(run())
     return filename
 
-def escolher_voz(data: dict) -> str:
-    # prioridade: voice explícita > lang > default
+# def escolher_voz(data: dict) -> str:
+#     # prioridade: voice explícita > lang > default
+#     voice = (data.get("voice") or "").strip()
+#     if voice:
+#         return voice
+
+#     lang = (data.get("lang") or "").strip().lower()
+#     if lang == "pt":
+#         return VOICE_PT
+#     if lang == "en":
+#         return VOICE_EN
+
+#     return VOICE_DEFAULT
+
+def escolher_voz(data: dict):
     voice = (data.get("voice") or "").strip()
     if voice:
-        return voice
+        return voice, None  # rate opcional
 
     lang = (data.get("lang") or "").strip().lower()
     if lang == "pt":
-        return VOICE_PT
+        return VOICE_PT, RATE_PT
     if lang == "en":
-        return VOICE_EN
+        return VOICE_EN, RATE_EN
 
-    return VOICE_DEFAULT
+    return VOICE_DEFAULT, None
+
 
 class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -57,7 +75,6 @@ class Handler(BaseHTTPRequestHandler):
         
         with open("/tmp/tts_debug.log", "a", encoding="utf-8") as f:
             f.write(f"TTS_RECV -> text={text!r} lang={data.get('lang')}\n")
-
 
         if not text:
             self.send_response(400)
