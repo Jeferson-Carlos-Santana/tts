@@ -54,6 +54,8 @@ class Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", "0"))
         data = json.loads(self.rfile.read(length) or b"{}")
         text = (data.get("text") or "").strip()
+        
+        print("TTS_RECV -> text:", repr(text), "| lang:", data.get("lang"))
 
         if not text:
             self.send_response(400)
