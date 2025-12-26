@@ -55,7 +55,9 @@ class Handler(BaseHTTPRequestHandler):
         data = json.loads(self.rfile.read(length) or b"{}")
         text = (data.get("text") or "").strip()
         
-        print("TTS_RECV -> text:", repr(text), "| lang:", data.get("lang"))
+        with open("/tmp/tts_debug.log", "a", encoding="utf-8") as f:
+            f.write(f"TTS_RECV -> text={text!r} lang={data.get('lang')}\n")
+
 
         if not text:
             self.send_response(400)
