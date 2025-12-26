@@ -24,19 +24,19 @@ def filename_from_text(texto: str, voice: str) -> str:
     key = hashlib.md5(f"{texto}_{voice}".encode("utf-8")).hexdigest()
     return f"{key}.mp3"
 
-def gerar_audio(texto: str, voice: str) -> str:
-    filename = filename_from_text(texto, voice)
-    out_path = os.path.join(BASE_DIR, filename)
+# def gerar_audio(texto: str, voice: str) -> str:
+#     filename = filename_from_text(texto, voice)
+#     out_path = os.path.join(BASE_DIR, filename)
 
-    # ✅ se já existe, não gera de novo
-    if os.path.exists(out_path):
-        return filename
+#     # ✅ se já existe, não gera de novo
+#     if os.path.exists(out_path):
+#         return filename
 
-    async def run():
-        await edge_tts.Communicate(text=texto, voice=voice).save(out_path)
+#     async def run():
+#         await edge_tts.Communicate(text=texto, voice=voice).save(out_path)
 
-    asyncio.run(run())
-    return filename
+#     asyncio.run(run())
+#     return filename
 
 # def escolher_voz(data: dict) -> str:
 #     # prioridade: voice explícita > lang > default
@@ -51,6 +51,24 @@ def gerar_audio(texto: str, voice: str) -> str:
 #         return VOICE_EN
 
 #     return VOICE_DEFAULT
+
+def gerar_audio(texto: str, voice: str, rate: str | None) -> str:
+    key = hashlib.md5(f"{texto}_{voice}_{rate}".encode("utf-8")).hexdigest()
+    filename = f"{key}.mp3"
+    out_path = os.path.join(BASE_DIR, filename)
+
+    if os.path.exists(out_path):
+        return filename
+
+    async def run():
+        await edge_tts.Communicate(
+            text=texto,
+            voice=voice,
+            rate=rate
+        ).save(out_path)
+
+    asyncio.run(run())
+    return filename
 
 def escolher_voz(data: dict):
     voice = (data.get("voice") or "").strip()
@@ -80,8 +98,8 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             return
 
-        voice = escolher_voz(data)
-        filename = gerar_audio(text, voice)
+        voice, rate = escolher_voz(data)
+        filename = gerar_audio(text, voice, rate)
 
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
