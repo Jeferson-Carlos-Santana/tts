@@ -75,8 +75,8 @@ def gerar_audio(texto: str, voice: str, rate: str | None) -> str:
 
     asyncio.run(run())
      # espera curta para garantir flush do disco
-    for _ in range(10):
-        if os.path.exists(out_path) and os.path.getsize(out_path) > 1024:
+    for _ in range(40):
+        if os.path.exists(out_path) and os.path.getsize(out_path) > 2048:
             break
         time.sleep(0.05)
         
