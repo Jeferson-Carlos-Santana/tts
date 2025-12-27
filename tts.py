@@ -1,4 +1,4 @@
-import os, time
+import os
 import json
 import asyncio
 import hashlib
@@ -74,12 +74,6 @@ def gerar_audio(texto: str, voice: str, rate: str | None) -> str:
             ).save(out_path)
 
     asyncio.run(run())
-     # espera curta para garantir flush do disco
-    for _ in range(40):
-        if os.path.exists(out_path) and os.path.getsize(out_path) > 2048:
-            break
-        time.sleep(0.05)
-        
     return filename
 
 def escolher_voz(data: dict):
