@@ -2,7 +2,7 @@ import os
 import time
 
 TMP_DIR = "/usr/local/lsws/Example/html/demo/media/cache/tmp"
-TTL = 30 * 60  # 30 minutos
+TTL = 1 * 60  # 30 minutos
 
 now = time.time()
 
