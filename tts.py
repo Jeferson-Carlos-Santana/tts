@@ -28,16 +28,48 @@ def filename_from_text(texto: str, voice: str) -> str:
     return f"{key}.mp3"
 
 # def gerar_audio(texto: str, voice: str, rate: str | None) -> str:
+# def gerar_audio(texto: str, voice: str, rate: str | None, fixed: bool = False) -> str:
+#     key = hashlib.md5(f"{texto}_{voice}_{rate}".encode("utf-8")).hexdigest()
+#     filename = f"{key}.mp3"
+#     # out_path = os.path.join(BASE_DIR, filename)
+#     base = BASE_FIXOS if fixed else BASE_TMP
+#     out_path = os.path.join(base, filename)
+
+
+#     if os.path.exists(out_path):
+#         # return filename
+#         rel_path = f"fixos/{filename}" if fixed else f"tmp/{filename}"
+#         return rel_path
+
 def gerar_audio(texto: str, voice: str, rate: str | None, fixed: bool = False) -> str:
     key = hashlib.md5(f"{texto}_{voice}_{rate}".encode("utf-8")).hexdigest()
     filename = f"{key}.mp3"
-    # out_path = os.path.join(BASE_DIR, filename)
+
     base = BASE_FIXOS if fixed else BASE_TMP
     out_path = os.path.join(base, filename)
 
+    rel_path = f"fixos/{filename}" if fixed else f"tmp/{filename}"
 
     if os.path.exists(out_path):
-        return filename
+        return rel_path
+
+    async def run():
+        if rate:
+            await edge_tts.Communicate(
+                text=texto,
+                voice=voice,
+                rate=rate
+            ).save(out_path)
+        else:
+            await edge_tts.Communicate(
+                text=texto,
+                voice=voice
+            ).save(out_path)
+
+    asyncio.run(run())
+    return rel_path
+
+
 
     async def run():
         if rate:
