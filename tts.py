@@ -6,7 +6,11 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import edge_tts
 
 BASE_DIR = r"/usr/local/lsws/Example/html/demo/media/cache"
+BASE_FIXOS = os.path.join(BASE_DIR, "fixos")
+BASE_TMP   = os.path.join(BASE_DIR, "tmp")
 os.makedirs(BASE_DIR, exist_ok=True)
+os.makedirs(BASE_FIXOS, exist_ok=True)
+os.makedirs(BASE_TMP, exist_ok=True)
 
 # ✅ mantém comportamento atual (default)
 VOICE_DEFAULT = "en-US-AvaNeural"
