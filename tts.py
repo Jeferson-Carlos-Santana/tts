@@ -20,7 +20,7 @@ VOICE_EN = "en-GB-RyanNeural"
 VOICE_PT = "pt-BR-AntonioNeural"
 
 RATE_PT = "+25%"
-RATE_EN = "-25%"
+RATE_EN = "-20%"
 
 def filename_from_text(texto: str, voice: str) -> str:
     # (assim não mistura PT e EN no mesmo arquivo)
