@@ -17,14 +17,14 @@ os.makedirs(BASE_TMP, exist_ok=True)
 VOICE_DEFAULT = "en-US-AvaNeural"
 
 # novas vozes por idioma (você pode trocar depois)
-# VOICE_EN = "en-GB-RyanNeural"
-# VOICE_PT = "pt-BR-AntonioNeural"
+VOICE_EN = "en-GB-RyanNeural"
+VOICE_PT = "pt-BR-AntonioNeural"
 
 # VOICE_EN = "en-GB-SoniaNeural"
 # VOICE_PT = "pt-BR-FranciscaNeural"
 
-VOICE_EN = "en-GB-LibbyNeural"
-VOICE_PT = "pt-BR-BrendaNeural"
+# VOICE_EN = "en-GB-LibbyNeural"
+# VOICE_PT = "pt-BR-BrendaNeural"
 
 RATE_PT = "+25%"
 RATE_EN = "-20%"
