@@ -94,20 +94,19 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps({"file": filename}).encode())
 
-
+# RETORNA PARA UMA VERSAO ESTAVEL DESCOMENTE B789
 # server = ThreadingHTTPServer(("0.0.0.0", 9000), Handler)
 # print("TTS em http://127.0.0.1:9000")
 # server.serve_forever()
 
-
-
+# RETORNA PARA UMA VERSAO ESTAVEL COMENTE DAQUI PRA BAIXO B789
 def start_server(port):
     server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
     print(f"TTS rodando na porta {port}")
     server.serve_forever()
 
 if __name__ == "__main__":
-    ports = [9000, 9001, 9002, 9003]  # 4 processos
+    ports = [9000]  # alimentar aqui PORTS = [9000,9001,9002,9003,9004,9005,9006,9007]
 
     processes = []
     for port in ports:
