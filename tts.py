@@ -2,8 +2,8 @@ import os
 import json
 import asyncio
 import hashlib
+import multiprocessing
 from http.server import BaseHTTPRequestHandler, HTTPServer, ThreadingHTTPServer
-
 import edge_tts
 
 BASE_DIR = r"/usr/local/lsws/Example/html/demo/media/cache"
@@ -56,22 +56,6 @@ def gerar_audio(texto: str, voice: str, rate: str | None, fixed: bool = False) -
     asyncio.run(run())
     return rel_path
 
-    # async def run():
-    #     if rate:
-    #         await edge_tts.Communicate(
-    #             text=texto,
-    #             voice=voice,
-    #             rate=rate
-    #         ).save(out_path)
-    #     else:
-    #         await edge_tts.Communicate(
-    #             text=texto,
-    #             voice=voice
-    #         ).save(out_path)
-
-    # asyncio.run(run())
-    # return filename
-
 def escolher_voz(data: dict):
     voice = (data.get("voice") or "").strip()
     if voice:
@@ -110,9 +94,28 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps({"file": filename}).encode())
 
-#server = HTTPServer(("0.0.0.0", 9000), Handler)
-server = ThreadingHTTPServer(("0.0.0.0", 9000), Handler)
-print("TTS em http://127.0.0.1:9000")
-server.serve_forever()
+
+# server = ThreadingHTTPServer(("0.0.0.0", 9000), Handler)
+# print("TTS em http://127.0.0.1:9000")
+# server.serve_forever()
+
+
+
+def start_server(port):
+    server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
+    print(f"TTS rodando na porta {port}")
+    server.serve_forever()
+
+if __name__ == "__main__":
+    ports = [9000, 9001, 9002, 9003]  # 4 processos
+
+    processes = []
+    for port in ports:
+        p = multiprocessing.Process(target=start_server, args=(port,))
+        p.start()
+        processes.append(p)
+
+    for p in processes:
+        p.join()
 
 # OBS: aí já vale migrar para FastAPI com múltiplos workers.
