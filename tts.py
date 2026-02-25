@@ -17,14 +17,11 @@ os.makedirs(BASE_TMP, exist_ok=True)
 VOICE_DEFAULT = "en-US-AvaNeural"
 
 # novas vozes por idioma (você pode trocar depois)
-# VOICE_EN = "en-GB-RyanNeural"
-# VOICE_PT = "pt-BR-AntonioNeural"
+VOICE_EN = "en-GB-RyanNeural"
+VOICE_PT = "pt-BR-AntonioNeural"
 
-VOICE_EN = "en-GB-SoniaNeural"
-VOICE_PT = "pt-BR-ThalitaMultilingualNeural"
-# VOICE_PT = "pt-BR-FranciscaNeural"
-
-
+# VOICE_EN = "en-GB-SoniaNeural"
+# VOICE_PT = "pt-BR-ThalitaMultilingualNeural"
 
 RATE_PT = "+25%"
 RATE_EN = "-20%"
@@ -93,7 +90,6 @@ class Handler(BaseHTTPRequestHandler):
         # filename = gerar_audio(text, voice, rate)
         fixed = bool(data.get("fixed"))
         filename = gerar_audio(text, voice, rate, fixed=fixed)
-
 
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
