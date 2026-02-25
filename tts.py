@@ -2,7 +2,8 @@ import os
 import json
 import asyncio
 import hashlib
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer, ThreadingHTTPServer
+
 import edge_tts
 
 BASE_DIR = r"/usr/local/lsws/Example/html/demo/media/cache"
@@ -12,10 +13,10 @@ os.makedirs(BASE_DIR, exist_ok=True)
 os.makedirs(BASE_FIXOS, exist_ok=True)
 os.makedirs(BASE_TMP, exist_ok=True)
 
-# ✅ mantém comportamento atual (default)
+# mantém comportamento atual (default)
 VOICE_DEFAULT = "en-US-AvaNeural"
 
-# ✅ novas vozes por idioma (você pode trocar depois)
+# novas vozes por idioma (você pode trocar depois)
 VOICE_EN = "en-GB-RyanNeural"
 VOICE_PT = "pt-BR-AntonioNeural"
 
@@ -55,21 +56,21 @@ def gerar_audio(texto: str, voice: str, rate: str | None, fixed: bool = False) -
     asyncio.run(run())
     return rel_path
 
-    async def run():
-        if rate:
-            await edge_tts.Communicate(
-                text=texto,
-                voice=voice,
-                rate=rate
-            ).save(out_path)
-        else:
-            await edge_tts.Communicate(
-                text=texto,
-                voice=voice
-            ).save(out_path)
+    # async def run():
+    #     if rate:
+    #         await edge_tts.Communicate(
+    #             text=texto,
+    #             voice=voice,
+    #             rate=rate
+    #         ).save(out_path)
+    #     else:
+    #         await edge_tts.Communicate(
+    #             text=texto,
+    #             voice=voice
+    #         ).save(out_path)
 
-    asyncio.run(run())
-    return filename
+    # asyncio.run(run())
+    # return filename
 
 def escolher_voz(data: dict):
     voice = (data.get("voice") or "").strip()
@@ -83,7 +84,6 @@ def escolher_voz(data: dict):
         return VOICE_EN, RATE_EN
 
     return VOICE_DEFAULT, None
-
 
 class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -110,6 +110,9 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps({"file": filename}).encode())
 
-server = HTTPServer(("0.0.0.0", 9000), Handler)
+#server = HTTPServer(("0.0.0.0", 9000), Handler)
+server = ThreadingHTTPServer(("0.0.0.0", 9000), Handler)
 print("TTS em http://127.0.0.1:9000")
 server.serve_forever()
+
+# OBS: aí já vale migrar para FastAPI com múltiplos workers.
