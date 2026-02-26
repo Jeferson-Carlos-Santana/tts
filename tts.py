@@ -21,7 +21,7 @@ VOICE_DEFAULT = "en-US-AvaNeural"
 # VOICE_PT = "pt-BR-AntonioNeural"
 
 VOICE_EN_GB = "en-GB-SoniaNeural"
-VOICE_EN_US = "en-US-AvaNeural"
+VOICE_EN_US = "en-US-GuyNeural"
 
 VOICE_EN = "en-GB-SoniaNeural"
 VOICE_PT = "pt-BR-FranciscaNeural"
