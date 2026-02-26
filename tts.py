@@ -16,15 +16,17 @@ os.makedirs(BASE_TMP, exist_ok=True)
 # mantém comportamento atual (default)
 VOICE_DEFAULT = "en-US-AvaNeural"
 
-# novas vozes por idioma (você pode trocar depois)
-# VOICE_EN = "en-GB-RyanNeural"
-# VOICE_PT = "pt-BR-AntonioNeural"
+# VOZ INLGLES GB
+VOICE_EN_GB_M = "en-GB-RyanNeural"
+VOICE_EN_GB_F = "en-GB-SoniaNeural"
 
-VOICE_EN_GB = "en-GB-SoniaNeural"
-VOICE_EN_US = "en-US-GuyNeural"
+# VOZ AMERICANO
+VOICE_EN_US_M = "en-US-GuyNeural"
+VOICE_EN_US_F = "en-US-AvaNeural"
 
-VOICE_EN = "en-GB-SoniaNeural"
-VOICE_PT = "pt-BR-FranciscaNeural"
+# VOZ PORTUGUES
+VOICE_PT_M = "pt-BR-AntonioNeural"
+VOICE_PT_F = "pt-BR-FranciscaNeural"
 
 RATE_PT = "+25%"
 RATE_EN = "-20%"
@@ -62,18 +64,6 @@ def gerar_audio(texto: str, voice: str, rate: str | None, fixed: bool = False) -
     asyncio.run(run())
     return rel_path
 
-# def escolher_voz(data: dict):
-#     voice = (data.get("voice") or "").strip()
-#     if voice:
-#         return voice, None  # rate opcional
-
-#     lang = (data.get("lang") or "").strip().lower()
-#     if lang == "pt":
-#         return VOICE_PT, RATE_PT
-#     if lang == "en":
-#         return VOICE_EN, RATE_EN
-
-#     return VOICE_DEFAULT, None
 
 def escolher_voz(data: dict):
     voice = (data.get("voice") or "").strip()
@@ -81,17 +71,27 @@ def escolher_voz(data: dict):
         return voice, None
 
     lang = (data.get("lang") or "").strip().lower()
+    gender = data.get("voice_gender", "female")
 
     if lang == "pt":
-        return VOICE_PT, RATE_PT
+        if gender == "male":
+            return VOICE_PT_M, RATE_PT
+        else:
+            return VOICE_PT_F, RATE_PT
 
     if lang == "en":
         variant = (data.get("english_variant") or "uk").lower()
 
         if variant == "us":
-            return VOICE_EN_US, RATE_EN
+            if gender == "male":
+                return VOICE_EN_US_M, RATE_EN
+            else:
+                return VOICE_EN_US_F, RATE_EN
         else:
-            return VOICE_EN_GB, RATE_EN
+            if gender == "male":
+                return VOICE_EN_GB_M, RATE_EN
+            else:
+                return VOICE_EN_GB_F, RATE_EN
 
     return VOICE_DEFAULT, None
 
