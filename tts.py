@@ -21,8 +21,10 @@ VOICE_EN_GB_M = "en-GB-RyanNeural"
 VOICE_EN_GB_F = "en-GB-SoniaNeural"
 
 # VOZ AMERICANO
-VOICE_EN_US_M = "en-US-GuyNeural"
-VOICE_EN_US_F = "en-US-AvaNeural"
+# VOICE_EN_US_M = "en-US-GuyNeural"
+# VOICE_EN_US_F = "en-US-AvaNeural"
+VOICE_EN_US_M = "en-US-AndrewNeural"
+VOICE_EN_US_F = "en-US-JennyNeural"
 
 # VOZ PORTUGUES
 VOICE_PT_M = "pt-BR-AntonioNeural"
@@ -64,7 +66,7 @@ def gerar_audio(texto: str, voice: str, rate: str | None, fixed: bool = False) -
     asyncio.run(run())
     return rel_path
 
-
+# TROCA DE VOZ E SEXO
 def escolher_voz(data: dict):
     voice = (data.get("voice") or "").strip()
     if voice:
