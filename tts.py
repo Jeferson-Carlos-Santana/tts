@@ -20,6 +20,9 @@ VOICE_DEFAULT = "en-US-AvaNeural"
 # VOICE_EN = "en-GB-RyanNeural"
 # VOICE_PT = "pt-BR-AntonioNeural"
 
+VOICE_EN_GB = "en-GB-SoniaNeural"
+VOICE_EN_US = "en-US-AvaNeural"
+
 VOICE_EN = "en-GB-SoniaNeural"
 VOICE_PT = "pt-BR-FranciscaNeural"
 
@@ -59,16 +62,36 @@ def gerar_audio(texto: str, voice: str, rate: str | None, fixed: bool = False) -
     asyncio.run(run())
     return rel_path
 
+# def escolher_voz(data: dict):
+#     voice = (data.get("voice") or "").strip()
+#     if voice:
+#         return voice, None  # rate opcional
+
+#     lang = (data.get("lang") or "").strip().lower()
+#     if lang == "pt":
+#         return VOICE_PT, RATE_PT
+#     if lang == "en":
+#         return VOICE_EN, RATE_EN
+
+#     return VOICE_DEFAULT, None
+
 def escolher_voz(data: dict):
     voice = (data.get("voice") or "").strip()
     if voice:
-        return voice, None  # rate opcional
+        return voice, None
 
     lang = (data.get("lang") or "").strip().lower()
+
     if lang == "pt":
         return VOICE_PT, RATE_PT
+
     if lang == "en":
-        return VOICE_EN, RATE_EN
+        variant = (data.get("english_variant") or "uk").lower()
+
+        if variant == "us":
+            return VOICE_EN_US, RATE_EN
+        else:
+            return VOICE_EN_GB, RATE_EN
 
     return VOICE_DEFAULT, None
 
